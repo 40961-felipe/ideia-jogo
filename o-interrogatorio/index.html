@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>O Interrogatório // Caso Helena Castro</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Cinzel:wght@600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Overlay Scanlines & Vignette -->
+  <div class="screen-effects">
+    <div class="vignette"></div>
+    <div class="scanlines"></div>
+    <div class="flicker"></div>
+  </div>
+
+  <div id="game-container">
+    <!-- Top HUD Bar -->
+    <header class="hud-header">
+      <div class="hud-left">
+        <span class="rec-dot"></span>
+        <span class="file-code">SALA 04 • GRAVAÇÃO POLICIAL [#4092-B]</span>
+      </div>
+      <div class="hud-center">
+        <span class="case-title">O DESAPARECIMENTO DE HELENA CASTRO</span>
+      </div>
+      <div class="hud-right">
+        <button id="sound-btn" class="hud-btn" title="Alternar Efeitos Sonoros">
+          <span id="sound-icon">🔊 SOM: ATIVADO</span>
+        </button>
+        <button id="restart-btn" class="hud-btn" title="Reiniciar Interrogatório">
+          ↺ REINICIAR
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace: Single Screen Viewport -->
+    <main class="interrogation-room">
+      
+      <!-- Left Column: Suspect Dossier & Vitals -->
+      <aside class="suspect-panel">
+        <div class="panel-card suspect-profile">
+          <div class="portrait-wrapper" id="portrait-box">
+            <!-- Dynamic SVG Portrait of Victor Vance -->
+            <svg id="victor-avatar" viewBox="0 0 200 240" class="portrait-svg">
+              <defs>
+                <radialGradient id="lamp-light" cx="50%" cy="10%" r="90%">
+                  <stop offset="0%" stop-color="#fff5db" stop-opacity="0.25"/>
+                  <stop offset="100%" stop-color="#000000" stop-opacity="0.8"/>
+                </radialGradient>
+                <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
+                </filter>
+              </defs>
+
+              <!-- Background aura -->
+              <rect width="200" height="240" fill="#0d1117" rx="8"/>
+              <circle cx="100" cy="50" r="110" fill="url(#lamp-light)"/>
+
+              <!-- Victor's Body / Suit -->
+              <g id="suit" filter="url(#shadow)">
+                <!-- Shoulders & Coat -->
+                <path d="M 25 240 L 40 160 L 70 145 L 100 160 L 130 145 L 160 160 L 175 240 Z" fill="#161b22"/>
+                <!-- Shirt Collar -->
+                <polygon points="85,145 100,180 115,145" fill="#e6edf3"/>
+                <!-- Tie -->
+                <polygon id="tie" points="96,160 104,160 106,230 100,238 94,230" fill="#8b1e22"/>
+                <!-- Lapels -->
+                <path d="M 40 160 L 85 195 L 75 147 Z" fill="#21262d"/>
+                <path d="M 160 160 L 115 195 L 125 147 Z" fill="#21262d"/>
+              </g>
+
+              <!-- Head & Neck -->
+              <g id="head-group">
+                <rect x="88" y="125" width="24" height="28" fill="#c99777" rx="4"/>
+                <path d="M 68 85 Q 65 140 100 142 Q 135 140 132 85 Q 130 45 100 45 Q 70 45 68 85 Z" fill="#dfaa88"/>
+                
+                <!-- Hair (Slicked back businessman haircut) -->
+                <path id="hair" d="M 63 80 C 60 40 85 28 100 28 C 120 28 140 40 137 80 C 135 60 128 42 100 42 C 75 42 66 60 63 80 Z" fill="#1b1c20"/>
+
+                <!-- Eyebrows (Morph via CSS / JS) -->
+                <path id="eyebrow-left" class="eyebrow" d="M 78 74 Q 87 70 94 73" stroke="#1b1c20" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                <path id="eyebrow-right" class="eyebrow" d="M 106 73 Q 113 70 122 74" stroke="#1b1c20" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+                <!-- Eyes -->
+                <g id="eyes">
+                  <ellipse cx="86" cy="84" rx="5" ry="3.5" fill="#f0f6fc"/>
+                  <ellipse cx="114" cy="84" rx="5" ry="3.5" fill="#f0f6fc"/>
+                  <circle id="pupil-left" cx="86" cy="84" r="2.2" fill="#0d1117"/>
+                  <circle id="pupil-right" cx="114" cy="84" r="2.2" fill="#0d1117"/>
+                  <path id="eyelid-left" d="M 80 81 Q 86 80 92 82" stroke="#442a1b" stroke-width="1.2" fill="none"/>
+                  <path id="eyelid-right" d="M 108 82 Q 114 80 120 81" stroke="#442a1b" stroke-width="1.2" fill="none"/>
+                </g>
+
+                <!-- Nose -->
+                <path d="M 100 82 L 98 102 L 104 104" stroke="#ab7758" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+
+                <!-- Mouth (Changes dynamically) -->
+                <path id="mouth" d="M 90 120 Q 100 123 112 119" stroke="#5a2c22" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+                <!-- Sweat droplets (hidden by default) -->
+                <g id="sweat-drops" opacity="0">
+                  <path d="M 74 88 C 72 84 76 82 76 85 C 76 89 74 91 74 88 Z" fill="#58a6ff"/>
+                  <path d="M 126 95 C 124 91 128 89 128 92 C 128 96 126 98 126 95 Z" fill="#58a6ff"/>
+                  <path d="M 103 66 C 101 62 105 60 105 63 C 105 67 103 69 103 66 Z" fill="#58a6ff"/>
+                </g>
+              </g>
+
+              <!-- Handcuffs silhouette at bottom -->
+              <g id="handcuffs" opacity="0.85">
+                <rect x="75" y="215" width="50" height="10" rx="3" fill="#8b949e"/>
+                <circle cx="70" cy="220" r="8" fill="none" stroke="#6e7681" stroke-width="4"/>
+                <circle cx="130" cy="220" r="8" fill="none" stroke="#6e7681" stroke-width="4"/>
+                <line x1="78" y1="220" x2="122" y2="220" stroke="#f0f6fc" stroke-width="2" stroke-dasharray="3,2"/>
+              </g>
+            </svg>
+
+            <!-- State badge over avatar -->
+            <div id="suspect-state-badge" class="state-badge calm">ESTADO: CÍNICO & CALMO</div>
+          </div>
+
+          <div class="suspect-info">
+            <h2 class="suspect-name">VICTOR VANCE (38)</h2>
+            <p class="suspect-role">Cofundador & CEO • Vance Capital</p>
+            <p class="suspect-status-desc" id="status-desc">"Advogados a caminho. Postura desafiadora e desdenhosa."</p>
+          </div>
+        </div>
+
+        <!-- Stress Meter & Biometrics -->
+        <div class="panel-card biometrics-card">
+          <div class="card-title">
+            <span>MONITOR BIOMÉTRICO</span>
+            <span id="bpm-display" class="bpm-counter">68 BPM</span>
+          </div>
+
+          <!-- Animated Heartbeat ECG Canvas -->
+          <div class="ecg-container">
+            <canvas id="ecgCanvas" width="280" height="48"></canvas>
+          </div>
+
+          <!-- Stress Meter Gauge -->
+          <div class="stress-bar-wrapper">
+            <div class="stress-header">
+              <span>NÍVEL DE ESTRESSE</span>
+              <strong id="stress-percentage">15%</strong>
+            </div>
+            <div class="progress-track">
+              <div id="stress-fill" class="progress-fill" style="width: 15%;"></div>
+              <div class="threshold-marker" style="left: 100%;" title="Confissão Imediata"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Discovered Clues Dossier -->
+        <div class="panel-card clues-card">
+          <div class="card-title">
+            <span>EVIDÊNCIAS & CONTRADIÇÕES</span>
+            <span id="clues-count" class="badge">0/4</span>
+          </div>
+          <ul id="clues-list" class="clues-list">
+            <li class="clue-item empty">Nenhuma contradição exposta ainda...</li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Right Column: Interrogation Log, Terminal & Questions -->
+      <section class="dialogue-panel">
+        
+        <!-- Rounds / Tries Bar -->
+        <div class="rounds-tracker">
+          <div class="rounds-label">
+            <span class="icon">⏳</span>
+            <span>PACIÊNCIA ANTES DA CHEGADA DOS ADVOGADOS:</span>
+          </div>
+          <div class="question-slots" id="question-slots">
+            <div class="slot active" data-index="1">#1</div>
+            <div class="slot active" data-index="2">#2</div>
+            <div class="slot active" data-index="3">#3</div>
+            <div class="slot active" data-index="4">#4</div>
+            <div class="slot active" data-index="5">#5</div>
+            <div class="slot active" data-index="6">#6</div>
+            <div class="slot active" data-index="7">#7</div>
+          </div>
+          <div class="slots-legend">
+            <span id="questions-left-text">7 perguntas restantes</span>
+          </div>
+        </div>
+
+        <!-- Chat / Dialogue Stream -->
+        <div class="transcript-box" id="transcript">
+          <!-- Initial Welcome Entry -->
+          <div class="dialogue-bubble victor initial">
+            <div class="speaker-tag">
+              <span class="badge-role">SUSPEITO</span>
+              <span class="speaker-name">VICTOR VANCE</span>
+              <span class="timestamp">23:42:10</span>
+            </div>
+            <div class="message-content">
+              <p><em>Victor ajeita a gola da camisa sob medida, apesar das algemas travando seus punhos. Ele ergue os olhos gélidos, sustentando o seu olhar com um sorriso cínico nos lábios.</em></p>
+              <p class="speech">"Boa noite, Detetive. Uma encenação admirável mandar duas viaturas me arrancarem de um jantar de negócios. Mas meus advogados já estão a caminho deste prédio com um habeas corpus.</p>
+              <p class="speech">Você tem exatamente o tempo até eles cruzarem aquela porta. Então me diga: você tem alguma prova factual sobre o desaparecimento da minha querida sócia Helena... ou vai apenas me fazer perder tempo?"</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Clue Quick-Suggestions -->
+        <div class="hints-drawer">
+          <span class="hints-title">Pistas no Dossiê (Clique para usar ou digite livremente):</span>
+          <div class="chips-container" id="chips-container">
+            <button class="chip-btn" data-query="Onde você estava entre 22h00 e 23h30 na noite do desaparecimento?">
+              🕒 Horário das 22h às 23h30
+            </button>
+            <button class="chip-btn" data-query="Encontramos vestígios recentes na antiga fábrica abandonada da sua família. O que você fazia lá?">
+              🏭 Fábrica Abandonada da Família
+            </button>
+            <button class="chip-btn" data-query="O carro de Helena foi achado na rodovia, mas o banco do motorista estava ajustado para a sua altura!">
+              🚗 Banco do Carro de Helena
+            </button>
+            <button class="chip-btn" data-query="Helena descobriu um desvio de 4 milhões de dólares na empresa poucas horas antes de sumir. O que tem a dizer?">
+              💰 Auditoria e Desvio de Dinheiro
+            </button>
+            <button class="chip-btn" data-query="O que tem escondido sob o concreto fresco no subsolo da sua fábrica, Victor?">
+              💀 O Subsolo da Fábrica
+            </button>
+          </div>
+        </div>
+
+        <!-- Bottom Input Form -->
+        <form id="question-form" class="interrogation-input-bar">
+          <div class="input-wrapper">
+            <span class="prompt-prefix">DETETIVE ></span>
+            <input 
+              type="text" 
+              id="player-input" 
+              placeholder="Digite sua pergunta ou confronte Victor com uma evidência..." 
+              autocomplete="off" 
+              maxlength="200"
+            />
+          </div>
+          <button type="submit" id="send-btn" class="submit-btn">
+            <span>INTERROGAR</span>
+            <span class="shortcut">[ENTER]</span>
+          </button>
+        </form>
+
+      </section>
+    </main>
+
+    <!-- Modal End Screen (Victory / Defeat) -->
+    <div id="endgame-modal" class="modal-backdrop hidden">
+      <div class="modal-card" id="modal-card">
+        <div class="modal-badge" id="modal-badge">FIM DE JOGO</div>
+        <h1 class="modal-title" id="modal-title">CONFISSÃO OBTIDA</h1>
+        <p class="modal-narrative" id="modal-narrative">
+          O suspeito não suportou a pressão psicológica...
+        </p>
+        <div class="modal-stats" id="modal-stats">
+          <!-- Injected dynamically -->
+        </div>
+        <div class="modal-actions">
+          <button id="modal-restart-btn" class="modal-btn">JOGAR NOVAMENTE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
