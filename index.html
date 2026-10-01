@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PING PONG — 15 CHALLENGE | Tênis de Mesa Competitivo</title>
+  <meta name="description" content="Jogo web competitivo de tênis de mesa com 15 fases, partidas com regra de 12 pontos e vantagem de 2, loja, ranking global e painel administrativo completo.">
+
+  <!-- Google Fonts: Orbitron for Gamer Headers, Rajdhani for futuristic accents, Inter for clean UI -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-top-left"></div>
+  <div class="ambient-glow glow-bottom-right"></div>
+
+  <!-- Main Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-logo" onclick="window.location.hash='inicio'">
+        <span class="logo-icon">🏓</span>
+        <div class="logo-text">
+          <span class="logo-main">PING PONG</span>
+          <span class="logo-sub">15 CHALLENGE</span>
+        </div>
+      </div>
+
+      <nav class="main-nav">
+        <button class="nav-link active" data-view="inicio"><span class="nav-icon">🏠</span> Início</button>
+        <button class="nav-link" data-view="jogo"><span class="nav-icon">🎮</span> Jogar</button>
+        <button class="nav-link" data-view="loja"><span class="nav-icon">🛒</span> Loja</button>
+        <button class="nav-link" data-view="inventario"><span class="nav-icon">🎒</span> Inventário</button>
+        <button class="nav-link" data-view="ranking"><span class="nav-icon">🏆</span> Ranking</button>
+        <button class="nav-link" data-view="perfil"><span class="nav-icon">👤</span> Perfil</button>
+        <button class="nav-link" data-view="como-jogar"><span class="nav-icon">❓</span> Como Jogar</button>
+        <!-- Admin link (visible only for ADMIN role) -->
+        <button class="nav-link nav-admin-link" id="navLinkAdmin" data-view="admin" style="display:none;">
+          <span class="nav-icon">🛡️</span> Painel Admin
+        </button>
+      </nav>
+
+      <div class="header-right">
+        <!-- Coins Chip -->
+        <div class="coins-badge" onclick="window.location.hash='loja'" title="Seu saldo de moedas. Clique para abrir a Loja!">
+          <span class="coin-icon">🪙</span>
+          <span id="userCoinsDisplay" class="coins-amount">200</span>
+        </div>
+
+        <!-- Audio Toggle Button -->
+        <button id="soundToggleBtn" class="btn-sound-toggle" title="Alternar Efeitos Sonoros">🔊 Som</button>
+
+        <!-- User Menu / Profile Chip -->
+        <div id="headerUserMenu" class="user-profile-chip" onclick="window.location.hash='perfil'">
+          <img id="headerUserAvatar" src="" alt="Avatar" class="avatar-chip">
+          <div class="user-chip-text">
+            <span id="headerUserName" class="user-chip-name">Jogador</span>
+            <span id="headerUserRoleBadge" class="user-role-badge">USER</span>
+          </div>
+        </div>
+
+        <!-- Auth Links (shown when logged out) -->
+        <div id="headerAuthLinks" class="auth-links" style="display:none;">
+          <button class="btn-auth-link" onclick="window.location.hash='login'">Entrar</button>
+          <button class="btn-auth-primary" onclick="window.location.hash='cadastro'">Cadastrar</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Router Container -->
+  <main class="main-content">
+
+    <!-- 1. VIEW: DASHBOARD / INÍCIO -->
+    <section id="view-inicio" class="app-view active">
+      <div class="view-hero">
+        <div class="hero-content">
+          <div class="hero-tag">🔥 TÊNIS DE MESA COMPETITIVO</div>
+          <h1 class="hero-title">PING PONG <span class="gradient-text">15 CHALLENGE</span></h1>
+          <p class="hero-slogan">"15 fases. Uma tentativa. Você consegue chegar ao topo?"</p>
+          <p class="hero-desc">
+            Enfrente 15 adversários em partidas disputadas até <strong>pelo menos 12 pontos com 2 de vantagem</strong>.
+            Se perder uma partida, sua sequência é resetada. Vença fases para acumular moedas, desbloquear equipamentos e disputar a liderança do Ranking Global!
+          </p>
+
+          <div class="hero-cta-group">
+            <button class="btn-primary-glow btn-lg" onclick="window.location.hash='jogo'">
+              <span class="btn-icon">🎮</span> CONTINUAR DESAFIO
+            </button>
+            <button class="btn-secondary btn-lg" onclick="window.location.hash='ranking'">
+              <span class="btn-icon">🏆</span> RANKING GLOBAL
+            </button>
+            <button class="btn-secondary btn-lg" onclick="window.location.hash='loja'">
+              <span class="btn-icon">🛒</span> LOJA DE ITENS
+            </button>
+          </div>
+        </div>
+
+        <!-- Dashboard User Quick Stats Card -->
+        <div class="dash-user-card glass-panel">
+          <div class="card-header-styled">
+            <span class="dash-greeting">Olá, <strong id="dashWelcomeName">Jogador</strong>!</span>
+            <button id="btnClaimDaily" class="btn-mini-reward" title="Coletar bônus diário gratuito">🎁 +100 Moedas Grátis</button>
+          </div>
+
+          <div class="dash-stats-grid">
+            <div class="dash-stat-box">
+              <span class="stat-box-title">Seu Recorde</span>
+              <span id="dashRecordPhase" class="stat-box-val highlight-cyan">Fase 1</span>
+            </div>
+            <div class="dash-stat-box">
+              <span class="stat-box-title">Melhor Pontuação</span>
+              <span id="dashRecordScore" class="stat-box-val highlight-gold">0</span>
+            </div>
+            <div class="dash-stat-box">
+              <span class="stat-box-title">Posição Global</span>
+              <span id="dashGlobalRank" class="stat-box-val highlight-magenta">#--</span>
+            </div>
+          </div>
+
+          <!-- 15-Phases Progression Mini Strip -->
+          <div class="dash-roadmap-preview">
+            <div class="roadmap-preview-title">Progresso da Sequência de 15 Fases:</div>
+            <div id="dashRoadmapStrip" class="roadmap-strip-flex">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Highlight Cards -->
+      <div class="features-grid">
+        <div class="feature-card glass-panel" onclick="window.location.hash='jogo'">
+          <div class="feature-icon">🏓</div>
+          <h3>Regra Oficial dos 12+ Pontos</h3>
+          <p>Vitória com mínimo de 12 pontos e vantagem de 2 (ex: 12×10, 13×11, 14×12). Se empatar em 11×11 ou 12×12, o jogo segue em Deuce até alguém abrir 2 de vantagem!</p>
+        </div>
+        <div class="feature-card glass-panel" onclick="window.location.hash='loja'">
+          <div class="feature-icon">⚡</div>
+          <h3>Habilidades & Equipamentos</h3>
+          <p>Desbloqueie Raquetes Thunder e Flame, Bolas de Fogo e habilidades como Escudo, Freeze e Super Smash para virar o jogo.</p>
+        </div>
+        <div class="feature-card glass-panel" onclick="window.location.hash='ranking'">
+          <div class="feature-icon">🏆</div>
+          <h3>Competição Global</h3>
+          <p>Sua maior sequência sem derrotas define sua posição no topo do Ranking Mundial. Seja lendário!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. VIEW: JOGO (CANVAS ARENA) -->
+    <section id="view-jogo" class="app-view">
+      <div class="game-view-wrapper">
+        <!-- In-Game Top HUD -->
+        <div class="game-hud glass-panel">
+          <div class="hud-phase-info">
+            <span class="hud-phase-badge" id="hudPhaseTitle">Fase 1 — Muito fácil</span>
+            <span class="hud-streak-badge" id="hudCurrentStreak">Sequência: 0 vitórias</span>
+          </div>
+
+          <!-- Match Scoreboard with 12-points rule & Deuce status -->
+          <div class="hud-score-center">
+            <div class="hud-scoreboard">
+              <div class="score-player-side">
+                <span class="score-label">VOCÊ</span>
+                <span id="hudPlayerScore" class="score-number p-score">0</span>
+              </div>
+              <div class="score-divider">×</div>
+              <div class="score-ai-side">
+                <span id="hudAiScore" class="score-number ai-score">0</span>
+                <span class="score-label">ADVERSÁRIO</span>
+              </div>
+            </div>
+            <div id="hudMatchRuleNotice" class="hud-rule-tag">Mínimo 12 pontos • Vantagem de 2</div>
+          </div>
+
+          <div class="hud-actions">
+            <button id="btnInGamePause" class="btn-hud-icon" title="Pausar Partida [ESPAÇO]">⏸️</button>
+            <button id="btnInGameLeave" class="btn-hud-icon" title="Sair da Partida">🚪</button>
+          </div>
+        </div>
+
+        <!-- Ping Pong Canvas Arena Container -->
+        <div class="canvas-responsive-container">
+          <canvas id="pingPongCanvas"></canvas>
+        </div>
+
+        <!-- In-Game Skills Hotbar & Controls helper -->
+        <div class="game-bottom-bar glass-panel">
+          <div class="skills-hotbar-container">
+            <span class="hotbar-title">HABILIDADES EQUIPADAS:</span>
+            <div id="inGameSkillsHotbar" class="skills-slots-row">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <div class="controls-hint">
+            <span>🖱️ <strong>Mouse</strong>: Guia a raquete</span>
+            <span>⌨️ <strong>Teclas</strong>: [W / S] ou [↑ / ↓]</span>
+            <span>⚡ <strong>Habilidades</strong>: [1], [2], [3]</span>
+            <span>⏸️ <strong>Pausar</strong>: [ESPAÇO]</span>
+          </div>
+        </div>
+
+        <!-- Mobile Touch Helper Buttons (visible on touch screens) -->
+        <div class="mobile-touch-controls">
+          <button id="touchBtnPaddleUp" class="touch-ctrl-btn">▲</button>
+          <button id="touchBtnPaddleDown" class="touch-ctrl-btn">▼</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. VIEW: LOJA (SHOP) -->
+    <section id="view-loja" class="app-view">
+      <div class="view-header">
+        <h1 class="view-title">🛒 LOJA DE <span class="gradient-text">EQUIPAMENTOS</span></h1>
+        <p class="view-subtitle">Personalize seu estilo de jogo com itens exclusivos e habilidades táticas de alto impacto.</p>
+
+        <!-- Category Tabs -->
+        <div class="shop-tabs">
+          <button class="shop-tab-btn active" data-category="rackets">🏓 RAQUETES</button>
+          <button class="shop-tab-btn" data-category="balls">⚪ BOLINHAS</button>
+          <button class="shop-tab-btn" data-category="tables">🏟️ MESAS</button>
+          <button class="shop-tab-btn" data-category="skills">⚡ HABILIDADES</button>
+        </div>
+      </div>
+
+      <!-- Shop Items Grid -->
+      <div id="shopItemsGrid" class="shop-grid">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- 4. VIEW: INVENTÁRIO -->
+    <section id="view-inventario" class="app-view">
+      <div class="view-header">
+        <h1 class="view-title">🎒 MEU <span class="gradient-text">INVENTÁRIO</span></h1>
+        <p class="view-subtitle">Gerencie e equipe seus itens cosméticos e até 3 habilidades ativas para as partidas.</p>
+      </div>
+
+      <!-- Active Equipment Showcase -->
+      <div class="inventory-equipped-banner glass-panel">
+        <h3 class="banner-title">EQUIPAMENTO ATUAL EM USO:</h3>
+        <div class="equipped-slots-grid">
+          <div class="slot-item">
+            <span class="slot-tag">🏓 RAQUETE:</span>
+            <div id="invEquippedRacket" class="slot-content">Carregando...</div>
+          </div>
+          <div class="slot-item">
+            <span class="slot-tag">⚪ BOLA:</span>
+            <div id="invEquippedBall" class="slot-content">Carregando...</div>
+          </div>
+          <div class="slot-item">
+            <span class="slot-tag">🏟️ MESA:</span>
+            <div id="invEquippedTable" class="slot-content">Carregando...</div>
+          </div>
+          <div class="slot-item slot-skills-full">
+            <span class="slot-tag">⚡ HABILIDADES ATIVAS (ATÉ 3):</span>
+            <div id="invEquippedSkills" class="slot-content">Carregando...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Owned Items Grid -->
+      <h3 class="section-divider-title">TODOS OS ITENS ADQUIRIDOS:</h3>
+      <div id="inventoryItemsGrid" class="shop-grid">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- 5. VIEW: RANKING GLOBAL -->
+    <section id="view-ranking" class="app-view">
+      <div class="view-header">
+        <h1 class="view-title">🏆 RANKING <span class="gradient-text">GLOBAL</span></h1>
+        <p class="view-subtitle">Jogadores classificados pela maior sequência de fases concluídas sem nenhuma derrota.</p>
+      </div>
+
+      <!-- Top 3 Podium Cards -->
+      <div id="rankingPodium" class="podium-container">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Global Ranking Table -->
+      <div class="ranking-table-card glass-panel">
+        <div class="table-responsive">
+          <table class="ranking-table">
+            <thead>
+              <tr>
+                <th>POSIÇÃO</th>
+                <th>JOGADOR</th>
+                <th>FASE MÁXIMA</th>
+                <th>PONTUAÇÃO</th>
+                <th>TEMPO</th>
+                <th>TENTATIVAS</th>
+                <th>DATA</th>
+              </tr>
+            </thead>
+            <tbody id="rankingTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. VIEW: PERFIL DO JOGADOR -->
+    <section id="view-perfil" class="app-view">
+      <div class="profile-hero-card glass-panel">
+        <div class="profile-main-info">
+          <img id="profileAvatar" src="" alt="Avatar" class="profile-avatar-lg">
+          <div class="profile-names">
+            <h2 id="profileName" class="profile-display-name">Carregando...</h2>
+            <div class="profile-subnames">
+              <span id="profileUsername" class="profile-user-handle">@username</span>
+              <span id="profileRoleBadge" class="user-role-badge">USER</span>
+            </div>
+            <span id="profileEmail" class="profile-user-email">email@exemplo.com</span>
+          </div>
+        </div>
+
+        <div class="profile-header-actions">
+          <button id="btnLogout" class="btn-secondary btn-sm">Sair da Conta</button>
+        </div>
+      </div>
+
+      <!-- Career Statistics Grid -->
+      <div class="profile-stats-grid">
+        <div class="p-stat-card glass-panel">
+          <span class="p-stat-label">Posição no Ranking</span>
+          <span id="profileRank" class="p-stat-val highlight-magenta">#--</span>
+        </div>
+        <div class="p-stat-card glass-panel">
+          <span class="p-stat-label">Maior Fase Alcançada</span>
+          <span id="profileHighestPhase" class="p-stat-val highlight-cyan">Fase 1</span>
+        </div>
+        <div class="p-stat-card glass-panel">
+          <span class="p-stat-label">Maior Pontuação</span>
+          <span id="profileHighestScore" class="p-stat-val highlight-gold">0</span>
+        </div>
+        <div class="p-stat-card glass-panel">
+          <span class="p-stat-label">Saldo de Moedas</span>
+          <span id="profileCoins" class="p-stat-val highlight-gold">🪙 200</span>
+        </div>
+        <div class="p-stat-card glass-panel">
+          <span class="p-stat-label">Vitórias</span>
+          <span id="profileWins" class="p-stat-val highlight-green">0</span>
+        </div>
+        <div class="p-stat-card glass-panel">
+          <span class="p-stat-label">Derrotas</span>
+          <span id="profileLosses" class="p-stat-val highlight-red">0</span>
+        </div>
+        <div class="p-stat-card glass-panel">
+          <span class="p-stat-label">Taxa de Vitória</span>
+          <span id="profileWinrate" class="p-stat-val">0%</span>
+        </div>
+        <div class="p-stat-card glass-panel">
+          <span class="p-stat-label">Melhor Tempo</span>
+          <span id="profileBestTime" class="p-stat-val">--</span>
+        </div>
+      </div>
+
+      <!-- 15-Phases Visual Roadmap -->
+      <div class="roadmap-card glass-panel">
+        <h3 class="roadmap-title">MAPA DE PROGRESSÃO DAS 15 FASES:</h3>
+        <p class="roadmap-desc">Para vencer o desafio máximo, complete da Fase 1 à Fase 15 em uma única tentativa ininterrupta.</p>
+        <div id="profileRoadmapList" class="roadmap-nodes-container">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- Career History: Matches and Coin Transactions -->
+      <div class="profile-tabs-wrapper">
+        <div class="profile-two-columns">
+          <!-- Match History -->
+          <div class="profile-sub-card glass-panel">
+            <h3 class="sub-card-title">Histórico de Partidas Recentes</h3>
+            <div class="table-responsive">
+              <table class="simple-table">
+                <thead>
+                  <tr>
+                    <th>Fase</th>
+                    <th>Placar</th>
+                    <th>Resultado</th>
+                    <th>Pontos</th>
+                    <th>Tempo</th>
+                    <th>Hora</th>
+                  </tr>
+                </thead>
+                <tbody id="profileHistoryBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Coin Transactions -->
+          <div class="profile-sub-card glass-panel">
+            <h3 class="sub-card-title">Extrato de Moedas</h3>
+            <div class="table-responsive">
+              <table class="simple-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                    <th>Tipo</th>
+                  </tr>
+                </thead>
+                <tbody id="profileTransactionsBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. VIEW: COMO JOGAR -->
+    <section id="view-como-jogar" class="app-view">
+      <div class="view-header">
+        <h1 class="view-title">📖 COMO <span class="gradient-text">JOGAR</span></h1>
+        <p class="view-subtitle">Entenda as regras competitivas, o sistema de permadeath e a regra oficial dos 12 pontos com vantagem de 2.</p>
+      </div>
+
+      <div class="rules-container">
+        <!-- Rule Card: Regra dos 12+ pontos -->
+        <div class="rule-card glass-panel">
+          <div class="rule-icon">⚖️</div>
+          <div class="rule-body">
+            <h3>1. Regra Fundamental da Partida (12+ Pontos & Vantagem de 2)</h3>
+            <p>A partida não tem limite fixo de pontos! Para vencer, o jogador precisa alcançar <strong>pelo menos 12 pontos E ter uma vantagem de no mínimo 2 pontos</strong> sobre o adversário:</p>
+            <ul class="skills-bullets">
+              <li><strong>12 × 10</strong> → 🏆 VITÓRIA</li>
+              <li><strong>12 × 9</strong> → 🏆 VITÓRIA</li>
+              <li><strong>12 × 11</strong> → ❌ A PARTIDA CONTINUA</li>
+              <li><strong>13 × 11</strong> → 🏆 VITÓRIA</li>
+              <li><strong>13 × 12</strong> → ❌ A PARTIDA CONTINUA</li>
+              <li><strong>14 × 12</strong> → 🏆 VITÓRIA</li>
+              <li><strong>15 × 13</strong> → 🏆 VITÓRIA</li>
+            </ul>
+            <p><small>*Se empatar em 11×11 ou 12×12, o jogo entra em Deuce e só termina com 2 pontos consecutivos de vantagem.</small></p>
+          </div>
+        </div>
+
+        <!-- Rule Card 2 -->
+        <div class="rule-card glass-panel">
+          <div class="rule-icon">🏓</div>
+          <div class="rule-body">
+            <h3>2. Regra de Ouro da Sequência (15 Fases)</h3>
+            <p>O jogo possui <strong>exatamente 15 fases</strong>. Você começa na <strong>Fase 1</strong> e precisa vencer cada partida para avançar. Se você perder qualquer partida, sua sequência é imediatamente <strong>encerrada</strong> e você volta para a Fase 1! O ranking considera a sua melhor sequência contínua sem nenhuma derrota.</p>
+          </div>
+        </div>
+
+        <!-- Rule Card 3 -->
+        <div class="rule-card glass-panel">
+          <div class="rule-icon">🪙</div>
+          <div class="rule-body">
+            <h3>3. Economia & Recompensas em Moedas</h3>
+            <p>Todo jogador começa com <strong>200 moedas</strong>. Cada fase vencida rende uma recompensa crescente:</p>
+            <div class="reward-table-preview">
+              <span>F1: +10 🪙</span> | <span>F2: +15 🪙</span> | <span>F3: +20 🪙</span> | <span>F4: +30 🪙</span> | <span>F5: +40 🪙 (+50 Bônus)</span> | <span>F10: +125 🪙 (+150 Bônus)</span> | <span>F15: +500 🪙 (+500 Bônus)</span>
+            </div>
+            <p><small>*Se você perder uma partida, ganha +0 moedas naquela fase, mas as moedas já acumuladas na sua carteira NÃO são perdidas!</small></p>
+          </div>
+        </div>
+
+        <!-- Rule Card 4 -->
+        <div class="rule-card glass-panel">
+          <div class="rule-icon">⚡</div>
+          <div class="rule-body">
+            <h3>4. Habilidades Especiais</h3>
+            <p>Compre habilidades na Loja e equipe até 3 delas no seu Inventário. Durante a partida, aperte as teclas [1], [2], [3] para ativá-las:</p>
+            <ul class="skills-bullets">
+              <li><strong>⚡ Velocidade:</strong> +60% de velocidade na raquete por 5 segundos.</li>
+              <li><strong>🛡️ Escudo:</strong> Barreira laser atrás de você que bloqueia 1 gol perdido.</li>
+              <li><strong>🔥 Smash:</strong> Próxima rebatida dispara a 2.2x de velocidade furiosa!</li>
+              <li><strong>❄️ Freeze:</strong> Reduz a velocidade da bola para 40% por 3 segundos.</li>
+              <li><strong>🎯 Precisão:</strong> Aumenta o tamanho da sua raquete em 50% por 5 segundos.</li>
+              <li><strong>⚡ Turbo:</strong> Combina ultra-velocidade e reflexo perfeito por 4 segundos.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. VIEW: LOGIN -->
+    <section id="view-login" class="app-view">
+      <div class="auth-wrapper">
+        <div class="auth-card glass-panel">
+          <div class="auth-brand">
+            <span class="auth-icon">🏓</span>
+            <h2>ENTRAR NO JOGO</h2>
+            <p>Acesse seu perfil e continue sua escalada nas 15 fases</p>
+          </div>
+
+          <form id="formLogin" class="auth-form">
+            <div id="loginError" class="auth-error-msg"></div>
+
+            <div class="form-group">
+              <label for="loginEmail">E-mail</label>
+              <input type="email" id="loginEmail" required placeholder="seu.email@exemplo.com">
+            </div>
+
+            <div class="form-group">
+              <label for="loginPass">Senha</label>
+              <input type="password" id="loginPass" required placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="btn-primary-glow btn-block">ENTRAR</button>
+          </form>
+
+          <div class="auth-divider"><span>OU</span></div>
+
+          <button id="btnGoogleLogin" class="btn-google-oauth">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.3l3.7 2.9C6.2 7.3 8.9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.3 14.8c-.2-.7-.4-1.5-.4-2.3 0-.8.1-1.6.4-2.3L1.6 7.3C.6 9.3 0 10.6 0 12.5s.6 3.2 1.6 5.2l3.7-2.9z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.3-6.7-5.2L1.6 17c1.9 3.7 5.8 7 10.4 7z"/></svg>
+            ENTRAR COM GOOGLE
+          </button>
+
+          <div class="auth-footer-text">
+            Não tem uma conta? <a href="#cadastro">CRIAR CONTA</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. VIEW: CADASTRO -->
+    <section id="view-cadastro" class="app-view">
+      <div class="auth-wrapper">
+        <div class="auth-card glass-panel">
+          <div class="auth-brand">
+            <span class="auth-icon">✨</span>
+            <h2>CRIAR CONTA</h2>
+            <p>Comece com 200 moedas e dispute o Ranking Global</p>
+          </div>
+
+          <form id="formRegister" class="auth-form">
+            <div id="registerError" class="auth-error-msg"></div>
+
+            <div class="form-group">
+              <label for="regName">Nome Completo</label>
+              <input type="text" id="regName" required placeholder="João Silva">
+            </div>
+
+            <div class="form-group">
+              <label for="regUsername">Nome de Usuário (Nick)</label>
+              <input type="text" id="regUsername" required placeholder="player123">
+            </div>
+
+            <div class="form-group">
+              <label for="regEmail">E-mail</label>
+              <input type="email" id="regEmail" required placeholder="seu.email@exemplo.com">
+            </div>
+
+            <div class="form-group">
+              <label for="regPass">Senha</label>
+              <input type="password" id="regPass" required minlength="4" placeholder="••••••••">
+            </div>
+
+            <div class="form-group">
+              <label for="regPassConfirm">Confirmar Senha</label>
+              <input type="password" id="regPassConfirm" required minlength="4" placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="btn-primary-glow btn-block">CRIAR CONTA E COMEÇAR</button>
+          </form>
+
+          <div class="auth-footer-text">
+            Já possui uma conta? <a href="#login">ENTRAR</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. VIEW: ADMIN PANEL (#admin) -->
+    <section id="view-admin" class="app-view">
+      <div class="admin-layout-container">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar glass-panel">
+          <div class="admin-sidebar-header">
+            <span class="admin-shield-icon">🛡️</span>
+            <div>
+              <h2 class="admin-sidebar-title">ADMIN PANEL</h2>
+              <span class="admin-sub">Central de Moderação</span>
+            </div>
+          </div>
+
+          <nav class="admin-nav-menu">
+            <button class="admin-tab-btn active" data-tab="dashboard">
+              <span class="icon">📊</span> Dashboard
+            </button>
+            <button class="admin-tab-btn" data-tab="users">
+              <span class="icon">👥</span> Usuários
+            </button>
+            <button class="admin-tab-btn" data-tab="banned">
+              <span class="icon">🚫</span> Contas Banidas
+            </button>
+            <button class="admin-tab-btn" data-tab="matches">
+              <span class="icon">🎮</span> Partidas
+            </button>
+            <button class="admin-tab-btn" data-tab="coins">
+              <span class="icon">🪙</span> Moedas & Economia
+            </button>
+            <button class="admin-tab-btn" data-tab="items">
+              <span class="icon">🛒</span> Itens & Loja
+            </button>
+            <button class="admin-tab-btn" data-tab="ranking">
+              <span class="icon">🏆</span> Ranking Global
+            </button>
+            <button class="admin-tab-btn" data-tab="logs">
+              <span class="icon">📋</span> Logs Administrativos
+            </button>
+          </nav>
+
+          <div class="admin-sidebar-footer">
+            <button class="btn-secondary btn-sm btn-block" onclick="window.location.hash='inicio'">Voltar ao Jogo</button>
+          </div>
+        </aside>
+
+        <!-- Admin Main Content Area -->
+        <div class="admin-main-area">
+
+          <!-- TAB 1: DASHBOARD -->
+          <div id="adminTab-dashboard" class="admin-subview active">
+            <div class="admin-section-header">
+              <h2>📊 Visão Geral do Sistema</h2>
+              <p>Métricas em tempo real de jogadores, partidas e circulação de moeda.</p>
+            </div>
+
+            <div class="admin-metrics-grid">
+              <div class="admin-metric-card glass-panel">
+                <span class="m-icon">👥</span>
+                <div class="m-data">
+                  <span class="m-title">Total de Jogadores</span>
+                  <span id="admTotalPlayers" class="m-val">0</span>
+                </div>
+              </div>
+              <div class="admin-metric-card glass-panel">
+                <span class="m-icon highlight-green">✅</span>
+                <div class="m-data">
+                  <span class="m-title">Jogadores Ativos</span>
+                  <span id="admActivePlayers" class="m-val highlight-green">0</span>
+                </div>
+              </div>
+              <div class="admin-metric-card glass-panel">
+                <span class="m-icon highlight-red">🚫</span>
+                <div class="m-data">
+                  <span class="m-title">Contas Banidas</span>
+                  <span id="admBannedPlayers" class="m-val highlight-red">0</span>
+                </div>
+              </div>
+              <div class="admin-metric-card glass-panel">
+                <span class="m-icon">🎮</span>
+                <div class="m-data">
+                  <span class="m-title">Partidas Realizadas</span>
+                  <span id="admTotalMatches" class="m-val">0</span>
+                </div>
+              </div>
+              <div class="admin-metric-card glass-panel">
+                <span class="m-icon highlight-cyan">🏆</span>
+                <div class="m-data">
+                  <span class="m-title">Vitórias de Fases</span>
+                  <span id="admMatchesWon" class="m-val highlight-cyan">0</span>
+                </div>
+              </div>
+              <div class="admin-metric-card glass-panel">
+                <span class="m-icon highlight-red">💀</span>
+                <div class="m-data">
+                  <span class="m-title">Derrotas Registradas</span>
+                  <span id="admMatchesLost" class="m-val highlight-red">0</span>
+                </div>
+              </div>
+              <div class="admin-metric-card glass-panel">
+                <span class="m-icon highlight-gold">🪙</span>
+                <div class="m-data">
+                  <span class="m-title">Moedas em Circulação</span>
+                  <span id="admCoinsCirculation" class="m-val highlight-gold">0</span>
+                </div>
+              </div>
+              <div class="admin-metric-card glass-panel">
+                <span class="m-icon highlight-purple">🛒</span>
+                <div class="m-data">
+                  <span class="m-title">Itens Comprados</span>
+                  <span id="admItemsBought" class="m-val highlight-purple">0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Registrations -->
+            <div class="admin-card glass-panel" style="margin-top: 1.5rem;">
+              <h3 class="admin-card-title">Usuários Cadastrados Recentemente</h3>
+              <div class="table-responsive">
+                <table class="simple-table">
+                  <thead>
+                    <tr>
+                      <th>Usuário</th>
+                      <th>E-mail</th>
+                      <th>Função (Role)</th>
+                      <th>Status</th>
+                      <th>Data de Cadastro</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admRecentUsersBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: USUÁRIOS -->
+          <div id="adminTab-users" class="admin-subview">
+            <div class="admin-section-header">
+              <h2>👥 Gerenciamento de Usuários</h2>
+              <p>Pesquise, filtre e aplique moderação em contas registradas.</p>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div class="admin-filter-bar glass-panel">
+              <div class="filter-input-group">
+                <input type="text" id="admUserSearchInput" placeholder="Buscar por username, nome, e-mail ou ID...">
+              </div>
+              <div class="filter-buttons-group">
+                <button class="adm-filter-btn active" data-filter="all">Todos</button>
+                <button class="adm-filter-btn" data-filter="ACTIVE">Ativos</button>
+                <button class="adm-filter-btn" data-filter="BANNED">Banidos</button>
+                <button class="adm-filter-btn" data-filter="ADMIN">Administradores</button>
+              </div>
+            </div>
+
+            <div class="admin-card glass-panel">
+              <div class="table-responsive">
+                <table class="ranking-table">
+                  <thead>
+                    <tr>
+                      <th>USUÁRIO</th>
+                      <th>E-MAIL</th>
+                      <th>FUNÇÃO</th>
+                      <th>FASE</th>
+                      <th>MOEDAS</th>
+                      <th>STATUS</th>
+                      <th>CADASTRO</th>
+                      <th>AÇÕES</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admUsersTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: CONTAS BANIDAS -->
+          <div id="adminTab-banned" class="admin-subview">
+            <div class="admin-section-header">
+              <h2>🚫 Contas Suspensas e Banidas</h2>
+              <p>Visualização rápida de todos os bloqueios ativos com seus motivos e prazos de expiração.</p>
+            </div>
+
+            <div class="admin-card glass-panel">
+              <div class="table-responsive">
+                <table class="ranking-table">
+                  <thead>
+                    <tr>
+                      <th>USUÁRIO</th>
+                      <th>TIPO DE BANIMENTO</th>
+                      <th>MOTIVO DO BANIMENTO</th>
+                      <th>DATA DO BLOQUEIO</th>
+                      <th>EXPIRA EM</th>
+                      <th>AÇÃO</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admBannedTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: PARTIDAS -->
+          <div id="adminTab-matches" class="admin-subview">
+            <div class="admin-section-header">
+              <h2>🎮 Registro Global de Partidas</h2>
+              <p>Auditoria de todas as partidas jogadas e seus placares computados.</p>
+            </div>
+
+            <div class="admin-card glass-panel">
+              <div class="table-responsive">
+                <table class="simple-table">
+                  <thead>
+                    <tr>
+                      <th>Jogador</th>
+                      <th>Fase</th>
+                      <th>Placar da Partida</th>
+                      <th>Resultado</th>
+                      <th>Pontos</th>
+                      <th>Duração</th>
+                      <th>Data/Hora</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admMatchesTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 5: ECONOMIA & MOEDAS -->
+          <div id="adminTab-coins" class="admin-subview">
+            <div class="admin-section-header">
+              <h2>🪙 Transações e Economia do Jogo</h2>
+              <p>Histórico completo de recompensas de fases, bônus e compras na loja.</p>
+            </div>
+
+            <div class="admin-card glass-panel">
+              <div class="table-responsive">
+                <table class="simple-table">
+                  <thead>
+                    <tr>
+                      <th>ID do Usuário</th>
+                      <th>Descrição</th>
+                      <th>Valor</th>
+                      <th>Tipo</th>
+                      <th>Fase</th>
+                      <th>Data/Hora</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admCoinsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 6: ITENS & LOJA -->
+          <div id="adminTab-items" class="admin-subview">
+            <div class="admin-section-header">
+              <h2>🛒 Catálogo de Itens da Loja</h2>
+              <p>Todos os 24 itens disponíveis (Raquetes, Bolas, Mesas e Habilidades).</p>
+            </div>
+
+            <div class="admin-card glass-panel">
+              <div class="table-responsive">
+                <table class="simple-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Categoria</th>
+                      <th>Raridade</th>
+                      <th>Preço</th>
+                      <th>Efeito Especial</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admItemsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 7: RANKING -->
+          <div id="adminTab-ranking" class="admin-subview">
+            <div class="admin-section-header">
+              <h2>🏆 Moderação do Ranking Global</h2>
+              <p>Classificação ao vivo sincronizada com os resultados das sequências.</p>
+            </div>
+
+            <div class="admin-card glass-panel">
+              <div class="table-responsive">
+                <table class="ranking-table">
+                  <thead>
+                    <tr>
+                      <th>Pos</th>
+                      <th>Jogador</th>
+                      <th>Fase Máxima</th>
+                      <th>Pontuação</th>
+                      <th>Tempo Total</th>
+                      <th>Tentativas</th>
+                      <th>Data</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admRankingTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 8: LOGS ADMINISTRATIVOS -->
+          <div id="adminTab-logs" class="admin-subview">
+            <div class="admin-section-header">
+              <h2>📋 Logs de Auditoria e Moderação</h2>
+              <p>Registro imutável de todas as ações de banimento, desbanimento e alterações administrativas.</p>
+            </div>
+
+            <div class="admin-card glass-panel">
+              <div class="table-responsive">
+                <table class="simple-table">
+                  <thead>
+                    <tr>
+                      <th>Data/Hora</th>
+                      <th>Administrador</th>
+                      <th>Ação</th>
+                      <th>Usuário Alvo</th>
+                      <th>Motivo Registrado</th>
+                      <th>Metadados</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admLogsTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. VIEW: BANNED (#banned) -->
+    <section id="view-banned" class="app-view">
+      <div class="banned-screen-container">
+        <div class="banned-card glass-panel">
+          <div class="banned-icon-pulse">🚫</div>
+          <h1 class="banned-title">CONTA SUSPENSA</h1>
+          <p class="banned-lead">Esta conta foi bloqueada e não pode acessar as funcionalidades do jogo.</p>
+
+          <div class="banned-details-box">
+            <div class="b-row">
+              <span>Motivo da Suspensão:</span>
+              <strong id="bannedReasonText" class="highlight-red">Violação das diretrizes.</strong>
+            </div>
+            <div class="b-row">
+              <span>Tipo de Bloqueio:</span>
+              <strong id="bannedTypeText">Permanente</strong>
+            </div>
+            <div class="b-row" id="bannedExpiresRow">
+              <span>Expira em:</span>
+              <strong id="bannedExpiresText">--</strong>
+            </div>
+          </div>
+
+          <p class="banned-contact-note">Se você acredita que isso foi um engano, entre em contato com a equipe de suporte ou faça login com outra conta.</p>
+
+          <button id="btnBannedLogout" class="btn-secondary btn-block">Sair da Conta</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MODALS & POPUPS ================= -->
+
+  <!-- 1. LIVE ITEM PREVIEW MODAL -->
+  <div id="previewModal" class="modal-backdrop">
+    <div class="modal-card glass-panel">
+      <button id="previewModalClose" class="modal-close-btn">&times;</button>
+      <div class="modal-header">
+        <span id="prevItemRarity" class="rarity-badge">RARO</span>
+        <h2 id="prevItemName" class="modal-item-title">Raquete Flame</h2>
+      </div>
+
+      <!-- Live Mini Canvas -->
+      <div class="modal-preview-canvas-wrapper">
+        <canvas id="itemPreviewCanvas"></canvas>
+      </div>
+
+      <div class="modal-item-details">
+        <p id="prevItemDesc" class="modal-item-desc">Descrição do item.</p>
+        <div class="modal-effect-box">
+          <strong>Efeito Visual & Mecânica:</strong>
+          <span id="prevItemEffect">Efeito especial ativo.</span>
+        </div>
+        <div class="modal-price-row">
+          <span class="price-label">Preço:</span>
+          <span id="prevItemPrice" class="price-val">🪙 250</span>
+        </div>
+      </div>
+
+      <div id="prevActionBtnContainer" class="modal-actions-container">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. VICTORY MODAL ("FASE CONCLUÍDA!") -->
+  <div id="victoryModal" class="modal-backdrop">
+    <div class="modal-card modal-victory glass-panel">
+      <div class="victory-header-animation">
+        <div class="trophy-bounce">🏆</div>
+        <h2 class="victory-title" id="vicTitleText">FASE CONCLUÍDA!</h2>
+        <span class="victory-subtitle" id="vicPhaseDone">Fase 1 Concluída!</span>
+      </div>
+
+      <!-- Match Score Badge -->
+      <div class="match-score-badge-box">
+        <span class="ms-label">Placar da Partida:</span>
+        <span id="vicMatchScore" class="ms-value">12 × 10</span>
+      </div>
+
+      <!-- Elite Achievement Container (Only shown when beating Phase 15) -->
+      <div id="vicEliteBanner" style="display:none;"></div>
+
+      <div class="victory-stats-box">
+        <div class="v-stat-row">
+          <span>Tempo de Partida:</span>
+          <strong id="vicDuration">24s</strong>
+        </div>
+        <div class="v-stat-row">
+          <span>Sequência sem Derrotas:</span>
+          <strong id="vicStreak" class="highlight-green">1 fase</strong>
+        </div>
+        <div class="v-stat-row">
+          <span>Próxima Fase:</span>
+          <strong id="vicNextPhase" class="highlight-gold">Fase 2</strong>
+        </div>
+      </div>
+
+      <!-- Animated Coin Reward Block -->
+      <div class="coin-reward-announcement">
+        <span class="reward-title">RECOMPENSA CONCEDIDA:</span>
+        <div class="reward-coins-amount" id="vicRewardCoins">+🪙 10</div>
+        <div class="reward-bonus-announcement" id="vicBonusCoins" style="display:none;"></div>
+        <div class="wallet-balance-note">Saldo atual: <strong id="vicTotalCoins">🪙 210</strong></div>
+      </div>
+
+      <button id="btnNextPhase" class="btn-primary-glow btn-lg btn-block">PRÓXIMA FASE ➔</button>
+    </div>
+  </div>
+
+  <!-- 3. DEFEAT MODAL ("VOCÊ PERDEU!") -->
+  <div id="defeatModal" class="modal-backdrop">
+    <div class="modal-card modal-defeat glass-panel">
+      <div class="defeat-header-animation">
+        <div class="skull-pulse">❌</div>
+        <h2 class="defeat-title">VOCÊ PERDEU!</h2>
+        <span class="defeat-subtitle" id="defPhaseFailed">Eliminado na Fase 1</span>
+      </div>
+
+      <!-- Defeat Match Score Badge -->
+      <div class="match-score-badge-box defeat-ms">
+        <span class="ms-label">Placar Final:</span>
+        <span id="defMatchScore" class="ms-value">10 × 12</span>
+      </div>
+
+      <p class="defeat-notice">
+        Sua sequência foi encerrada e você foi eliminado desta tentativa.
+        Moedas conquistadas nesta fase: <strong>+0 moedas</strong>.
+        Suas moedas acumuladas continuam salvas no seu perfil!
+      </p>
+
+      <div class="defeat-stats-box">
+        <div class="v-stat-row">
+          <span>Sequência Alcançada:</span>
+          <strong id="defStreak" class="highlight-gold">0 fases</strong>
+        </div>
+      </div>
+
+      <button id="btnRetryChallenge" class="btn-primary-glow btn-lg btn-block">
+        NOVA TENTATIVA (FASE 1) ↺
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. ADMIN: BAN USER MODAL -->
+  <div id="modalBanUser" class="modal-backdrop">
+    <div class="modal-card glass-panel">
+      <button class="modal-close-btn" id="modalBanClose">&times;</button>
+      <div class="modal-header">
+        <h2 class="modal-item-title highlight-red">⚠️ BANIR USUÁRIO</h2>
+      </div>
+
+      <form id="formBanUser" class="auth-form">
+        <div class="form-group">
+          <label>Usuário Alvo:</label>
+          <input type="text" id="banTargetUserDisplay" readonly style="opacity: 0.8;">
+          <input type="hidden" id="banTargetUserId">
+        </div>
+
+        <div class="form-group">
+          <label for="banReasonInput">Motivo do Banimento (Obrigatório):</label>
+          <textarea id="banReasonInput" required placeholder="Descreva detalhadamente o motivo da punição..." rows="3" class="admin-textarea"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de Banimento:</label>
+          <div class="ban-type-radios">
+            <label><input type="radio" name="banType" value="permanent" checked> Permanente</label>
+            <label><input type="radio" name="banType" value="temporary"> Temporário</label>
+          </div>
+        </div>
+
+        <div class="form-group" id="banExpiresGroup" style="display:none;">
+          <label for="banExpiresInput">Data de Término:</label>
+          <input type="date" id="banExpiresInput">
+        </div>
+
+        <div class="modal-actions-container">
+          <button type="button" class="btn-secondary" id="btnCancelBan">Cancelar</button>
+          <button type="submit" class="btn-modal-action btn-danger">Confirmar Banimento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. ADMIN: UNBAN USER MODAL -->
+  <div id="modalUnbanUser" class="modal-backdrop">
+    <div class="modal-card glass-panel">
+      <button class="modal-close-btn" id="modalUnbanClose">&times;</button>
+      <div class="modal-header">
+        <h2 class="modal-item-title highlight-green">✅ DESBANIR USUÁRIO</h2>
+      </div>
+
+      <form id="formUnbanUser" class="auth-form">
+        <p>Tem certeza que deseja reativar a conta deste usuário?</p>
+        <div class="form-group">
+          <label>Usuário:</label>
+          <input type="text" id="unbanTargetUserDisplay" readonly style="opacity: 0.8;">
+          <input type="hidden" id="unbanTargetUserId">
+        </div>
+
+        <div class="form-group">
+          <label for="unbanReasonInput">Motivo da Liberação (Opcional):</label>
+          <input type="text" id="unbanReasonInput" placeholder="Ex: Suspensão revista ou recurso aceito.">
+        </div>
+
+        <div class="modal-actions-container">
+          <button type="button" class="btn-secondary" id="btnCancelUnban">Cancelar</button>
+          <button type="submit" class="btn-modal-action btn-equip">Confirmar Desbanimento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. ADMIN: USER DETAILS MODAL -->
+  <div id="modalUserDetails" class="modal-backdrop">
+    <div class="modal-card glass-panel" style="max-width: 580px;">
+      <button class="modal-close-btn" id="modalDetailsClose">&times;</button>
+      <div class="modal-header">
+        <h2 class="modal-item-title">📋 Detalhes Administrativos do Jogador</h2>
+      </div>
+
+      <div id="userDetailsContent" class="user-details-body">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Toast Notification -->
+  <div id="gameToast" class="game-toast"></div>
+
+  <!-- Application Scripts -->
+  <script src="js/audio.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/shop.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
